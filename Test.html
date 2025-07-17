@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Event App</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+    <style>
+        /* New styles for the plan event section */
+        #plan-event-screen-content {
+            background-color: var(--dark-bg);
+            padding-top: 0;
+            padding-bottom: 70px;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-y: auto;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        #plan-event-screen-content .header {
+            width: 100%;
+            padding: 20px;
+            padding-top: 60px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            box-sizing: border-box;
+            text-align: center;
+            background-color: var(--dark-bg);
+        }
+
+        #plan-event-screen-content .header h1 {
+            font-size: 1.5em;
+            color: var(--text-color-primary);
+            margin: 0;
+        }
+
+        .plan-event-form-section {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .plan-event-form-section label {
+            font-size: 1em;
+            color: var(--text-color-primary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .plan-event-form-section input[type="text"],
+        .plan-event-form-section input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-color-primary);
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .plan-event-form-section .btn.primary {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .map-selection-section {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #here-map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .map-selection-section .location-marker {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #6a0dad; /* Purple color for markers */
+            border-radius: 50%;
+            border: 2px solid white;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+
+        .map-selection-section .btn.primary {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .payment-page-section {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-page-section h2 {
+            font-size: 1.2em;
+            color: var(--text-color-primary);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            justify-content: flex-start;
+        }
+
+        .payment-page-section .payment-option-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .payment-page-section .payment-option-card:has(input[type="radio"]:checked) {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 191, 166, 0.4);
+        }
+
+        .payment-page-section input[type="radio"] {
+            display: none;
+        }
+
+        .payment-page-section .payment-info {
+            flex-grow: 1;
+        }
+
+        .payment-page-section .payment-info h3 {
+            font-size: 1.1em;
+            color: var(--text-color-primary);
+            margin: 0;
+        }
+
+        .payment-page-section .payment-logo {
+            width: 50px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .payment-page-section .btn.primary {
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Back arrow styling */
+        .back-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5em;
+            color: var(--text-color-secondary);
+            text-decoration: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container" class="screen active">
+        <div id="home-screen-content" class="screen-content active">
+            <div class="header">
+                <span class="greeting">Hi, User.</span>
+                <span class="sub-greeting">Find your favourite event's</span>
+                <span class="icon-notification"></span>
+            </div>
+
+            <div class="section-your-tickets">
+                <h2>Your Ticket Event's <a href="#" class="view-all">View all</a></h2>
+                <div class="ticket-card">
+                    <div class="ticket-details">
+                        <h3>Mumbai Art Festival 2025,near station 29-30</h3>
+                        <p>Time: 10:00 PM</p>
+                        <p>Location: Mumbai, Maharastra</p>
+                        <p class="ticket-price">Premium ticket x1</p>
+                    </div>
+                    <div class="ticket-thumbnail"></div>
+                </div>
+            </div>
+
+            <div class="section-explore-nearby">
+                <h2>Explore Nearby <a href="#" class="view-all">View all</a></h2>
+                <div class="horizontal-scroll-container">
+                    <div class="event-card"
+                         style="background-image: url('assets/mumbai.png');"
+                         data-title="Mumbai Art Festival 2025,near station 29-30"
+                         data-image="assets/mumbai.png"
+                         data-attendees="20,000 participant"
+                         data-location="Mumbai, Maharashtra"
+                         data-about="The Mumbai Art Festival is a grand celebration of art and culture, showcasing various forms of artistic expression. Enjoy live performances, art installations, and interact with local and international artists. A must-visit for art enthusiasts."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Mumbai Art Festival 2025,near station 29-30</h4>
+                            <p>July 21 | 07:30 PM</p>
+                            <p class="event-price">₹1500.50</p>
+                        </div>
+                    </div>
+                    <div class="event-card pink-gradient"
+                         style="background-image: url('assets/sun.png');"
+                         data-title="Sunset Music Festival 2025"
+                         data-image="assets/sun.png"
+                         data-attendees="15,000 music lovers"
+                         data-location="Goa, India"
+                         data-about="Experience the magic of music as the sun sets over the beautiful beaches of Goa. Featuring top DJs and live bands, this festival promises an unforgettable evening of rhythm and good vibes."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Sunset Music Festival 2025</h4>
+                            <p>August 10 | 06:00 PM</p>
+                            <p class="event-price">₹500.00</p>
+                        </div>
+                    </div>
+                     <div class="event-card"
+                         style="background-image: url('assets/club.html');"
+                         data-title="Jazz Night Live"
+                         data-image="assets/club.html"
+                         data-attendees="50 jazz enthusiasts"
+                         data-location="Pune, Maharashtra"
+                         data-about="Immerse yourself in a soulful evening of live jazz music. Enjoy a relaxed atmosphere, great food, and captivating performances by renowned jazz artists. Free entry, but food and drinks are available for purchase."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>jazz Night Live </h4>
+                            <p>Oct 1 | 09:00 PM</p>
+                            <p class="event-price">Free Entry,but food ₹200</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-more-events">
+                <h2>More Event's <a href="#" class="view-all">View all</a></h2>
+                <div class="horizontal-scroll-container">
+                    <div class="event-card"
+                         style="background-image: url('assets/stand.png');"
+                         data-title="Comedy Central Stand-up Special"
+                         data-image="assets/stand.png"
+                         data-attendees="1000 laughs"
+                         data-location="Bengaluru, Karnataka"
+                         data-about="Get ready for an evening of side-splitting laughter with top comedians from Comedy Central. This stand-up special guarantees a night of humor and entertainment."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Comedy Central Stand-up Special</h4>
+                            <p>Nov 15 | 07:00 PM</p>
+                            <p class="event-price">₹450.00</p>
+                        </div>
+                    </div>
+                    <div class="event-card"
+                         style="background-image: url('assets/national.jpg');"
+                         data-title="National Dance Competition"
+                         data-image="assets/national.jpg"
+                         data-attendees="500 dancers"
+                         data-location="Delhi, India"
+                         data-about="Witness the best dance talent from across the nation compete for the coveted title. A thrilling display of various dance forms, passion, and skill."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>National Dance Competition</h4>
+                            <p>Sept 5 | 08:00 PM</p>
+                            <p class="event-price">₹2500.00</p>
+                        </div>
+                    </div>
+                    <div class="event-card"
+                         style="background-image: url('assets/cooking.png');"
+                         data-title="Cooking India"
+                         data-image="assets/cooking.png"
+                         data-attendees="200 foodies"
+                         data-location="Chennai, Tamil Nadu"
+                         data-about="A culinary extravaganza showcasing the rich diversity of Indian cuisine. Learn from celebrity chefs, participate in cooking challenges, and savor delicious dishes."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Cooking india</h4>
+                            <p>Sept 10 | 10:00 PM</p>
+                            <p class="event-price">₹5000.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-more-events">
+                <h2>Free Events <a href="#" class="view-all">View all</a></h2>
+                <div class="horizontal-scroll-container">
+                    <div class="event-card"
+                         style="background-image: url('assets/mot.png');"
+                         data-title="Motivation Talk"
+                         data-image="assets/mot.png"
+                         data-attendees="500 listeners"
+                         data-location="Hyderabad, Telangana"
+                         data-about="Join inspiring speakers for a free motivation talk. Learn strategies for personal growth, overcoming challenges, and achieving your goals. Open to all."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Motivation</h4>
+                            <p>Nov 19 | 09:00 PM</p>
+                            <p class="event-price">free</p>
+                        </div>
+                    </div>
+                    <div class="event-card"
+                         style="background-image: url('assets/idol.png');"
+                         data-title="Yekshegana Performance"
+                         data-image="assets/idol.png"
+                         data-attendees="300 audience members"
+                         data-location="Mangaluru, Karnataka"
+                         data-about="Experience the vibrant traditional folk theater of Karnataka, Yakshagana. This free performance will transport you to a world of mythology, music, and dance."
+                         onclick="showEventDetails(this)">
+                        <div class="event-info">
+                            <h4>Yekshegana</h4>
+                            <p>December 5 | 06:00 PM</p>
+                            <p class="event-price">free</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="explore-screen-content" class="screen-content">
+             <a href="#" class="back-arrow">&lt;</a>
+            <div class="header"><h1>Explore</h1></div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <button class="filter-btn"></button>
+            </div>
+            <div class="filter-options">
+                <div class="filter-section">
+                    <h3>Locations</h3>
+                    <input type="text" placeholder="New York">
+                </div>
+                <div class="filter-section">
+                    <h3>Categories</h3>
+                    <div class="category-buttons">
+                        <button class="btn secondary active">All</button>
+                        <button class="btn secondary">Sports</button>
+                        <button class="btn secondary">Music</button>
+                        <button class="btn secondary">Dance</button>
+                        <button class="btn secondary">Film</button>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h3>Price</h3>
+                    <input type="range" min="0" max="100" value="50" class="slider">
+                </div>
+                <button class="btn primary filter-apply-btn">Apply Filters</button>
+            </div>
+        </div>
+
+        <div id="plan-event-screen-content" class="screen-content">
+            <a href="#" class="back-arrow">&lt;</a>
+            <div class="header"><h1>Plan Your Event</h1></div>
+
+            <div class="plan-event-form-section" id="event-details-step">
+                <label for="event-name">Event Name:</label>
+                <input type="text" id="event-name" placeholder="e.g., Birthday Party">
+
+                <label for="attendees">Number of Attendees:</label>
+                <input type="number" id="attendees" placeholder="e.g., 50">
+
+                <label for="budget">Budget (₹):</label>
+                <input type="number" id="budget" placeholder="e.g., 10000">
+
+                <button class="btn primary" id="next-to-map">Next</button>
+            </div>
+
+            <div class="map-selection-section" id="map-selection-step">
+                <a href="#" class="back-arrow" id="back-to-details">&lt;</a>
+                <h2>Select Event Location</h2>
+                <div id="here-map-container"></div>
+                <p style="color: var(--text-color-secondary); text-align: center;" id="selected-location-text">Click on the map to select a location</p>
+                <button class="btn primary" id="submit-location">Submit Location</button>
+            </div>
+
+            <div class="payment-page-section" id="payment-page-step">
+                <a href="#" class="back-arrow" id="back-to-map">&lt;</a>
+                <h2>Choose Payment Method</h2>
+                <div class="payment-option-card">
+                    <input type="radio" id="payment-credit-card" name="payment-method" value="credit-card" checked>
+                    <label for="payment-credit-card">
+                        <div class="payment-info">
+                            <h3>Credit Card</h3>
+                            <p>Pay with Visa, MasterCard, etc.</p>
+                        </div>
+                        <span class="payment-logo" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png');"></span>
+                    </label>
+                </div>
+                <div class="payment-option-card">
+                    <input type="radio" id="payment-paypal" name="payment-method" value="paypal">
+                    <label for="payment-paypal">
+                        <div class="payment-info">
+                            <h3>PayPal</h3>
+                            <p>Pay with your PayPal account</p>
+                        </div>
+                        <span class="payment-logo" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg');"></span>
+                    </label>
+                </div>
+                <div class="payment-option-card">
+                    <input type="radio" id="payment-gpay" name="payment-method" value="gpay">
+                    <label for="payment-gpay">
+                        <div class="payment-info">
+                            <h3>Google Pay</h3>
+                            <p>Pay with your Google Pay account</p>
+                        </div>
+                        <span class="payment-logo" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/1280px-Google_Pay_Logo.svg.png');"></span>
+                    </label>
+                </div>
+                <button class="btn primary" id="confirm-payment">Confirm Payment</button>
+            </div>
+        </div>
+
+
+        <div id="tickets-screen-content" class="screen-content">
+            <div class="header"><h1>Tickets</h1></div>
+            <div class="calendar">
+                <div class="calendar-header">
+                    <h2>July 2023</h2>
+                    <div class="calendar-nav">
+                        <span class="nav-arrow">&lt;</span>
+                        <span class="nav-arrow">&gt;</span>
+                    </div>
+                </div>
+                <div class="calendar-days-week">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div class="calendar-days-grid">
+                    <span></span><span></span><span></span><span></span><span></span><span></span><span>1</span>
+                    <span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+                    <span>9</span><span>10</span><span class="active-day">11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+                    <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span>
+                    <span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span>
+                    <span>30</span><span>31</span>
+                </div>
+            </div>
+
+            <div class="ticket-tabs">
+                <button class="btn secondary active">Upcoming</button>
+                <button class="btn secondary">Past Event's</button>
+                <button class="btn secondary">Canceled</button>
+            </div>
+
+            <div class="ticket-list">
+                <div class="ticket-card-vertical">
+                    <img src="mumbai.png" alt="Event Thumbnail">
+                    <div class="details">
+                        <h3>California Art Festival 2023 Dana Point</h3>
+                        <p>Time: 10:00 PM</p>
+                        <p>Location: Mumbai, Maharastra</p>
+                        <span class="ticket-type">Premium ticket x1</span>
+                    </div>
+                </div>
+                </div>
+        </div>
+
+        <div id="profile-screen-content" class="screen-content">
+            <div class="header"><h1>Profile</h1></div>
+            <div class="profile-content-area">
+                <div class="profile-avatar">
+                    <img id="display-profile-image" src="https://via.placeholder.com/120/333333/666666?text=Profile" alt="User Profile">
+                </div>
+                <h2 id="display-username">Your Username</h2>
+                <p id="display-dob" class="profile-info">Date of Birth: DD/MM/YYYY</p>
+                <p id="display-email" class="profile-info">Email: user@example.com</p>
+                <button class="btn primary" style="margin-top: 30px;">Edit Profile</button>
+                <button class="btn secondary" style="margin-top: 15px;">Logout</button>
+            </div>
+        </div>
+
+        <div id="event-details-screen-content" class="screen-content">
+            <a href="#" class="back-arrow">&lt;</a>
+            <div class="event-details-image" style="background-image: url('https://via.placeholder.com/375x250/FF4081/FFD700?text=Event+Image');">
+                <span class="event-share-icon"></span>
+            </div>
+            <div class="event-details-info">
+                <h1 id="event-detail-title">California Art Festival 2023 Dana Point 29-30</h1>
+                <p id="event-detail-attendees" class="event-attendees">20,000 participant</p>
+                <div class="event-details-section">
+                    <h2>About us</h2>
+                    <p id="event-detail-about">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                </div>
+                <div class="event-details-section">
+                    <h2>Location</h2>
+                    <div class="map-placeholder"></div>
+                    <p id="event-detail-location" class="location-text">California, CA</p>
+                </div>
+                <button id="book-now-button" class="btn primary">Book Now</button>
+            </div>
+        </div>
+
+        <div id="select-ticket-screen-content" class="screen-content">
+            <a href="#" class="back-arrow">&lt;</a>
+            <div class="header">
+                <h1>Get a Ticket</h1>
+                <div class="ticket-header-event">
+                    <span id="ticket-header-title" class="ticket-header-title">California Art Festival 2023 Dana Point 29-30</span>
+                    <span id="ticket-header-price" class="ticket-header-price">$39.49</span>
+                </div>
+            </div>
+            <div class="ticket-options">
+                <div class="ticket-option-card">
+                    <input type="radio" id="ticket-regular" name="ticket-type" value="regular" checked>
+                    <label for="ticket-regular">
+                        <div class="ticket-info">
+                            <h3>Regular</h3>
+                            <p>Admission to the in-person drink & draw.</p>
+                        </div>
+                        <span class="ticket-price-option">$35.00/max</span>
+                    </label>
+                </div>
+                <div class="ticket-option-card">
+                    <input type="radio" id="ticket-vvip" name="ticket-type" value="vvip">
+                    <label for="ticket-vvip">
+                        <div class="ticket-info">
+                            <h3>VVIP</h3>
+                            <p>Admission to the in-person drink & draw.</p>
+                        </div>
+                        <span class="ticket-price-option">$45.00/max</span>
+                    </label>
+                </div>
+            </div>
+            <button id="confirm-ticket-button" class="btn primary">Confirm Ticket</button>
+        </div>
+
+        <div id="order-summary-screen-content" class="screen-content">
+            <a href="#" class="back-arrow">&lt;</a>
+            <div class="header"><h1>Details</h1></div>
+            <div class="event-summary-card">
+                <img src="assets\mumbai.png" alt="Event thumbnail">
+                <div class="summary-event-details">
+                    <h3>Mumbai Art Festival 2023 Marine drive 29-30</h3>
+                    <p>March 19, 2023</p>
+                    <p>10:00 PM - 12:00 PM</p>
+                </div>
+            </div>
+            <div class="order-summary-details">
+                <h2>Order Summary</h2>
+                <p>1x Regular price <span>$35.00</span></p>
+                <p>Subtotal <span>$35.00</span></p>
+                <p>Fees <span>$2.00</span></p>
+                <p class="total-price">Total <span>$37.00</span></p>
+            </div>
+            <div class="payment-method-section">
+                <h2>Payment Method <a href="#" class="change-method">Change Method</a></h2>
+                <div class="payment-option">
+                    <span class="payment-icon paypal"></span>
+                    <span class="payment-text">gurjotsingh.dev@gmail.com</span>
+                    <span class="payment-logo"></span> </div>
+            </div>
+            <button id="pay-now-button" class="btn primary">Pay Now</button>
+        </div>
+
+        <div id="ticket-display-screen-content" class="screen-content">
+            <a href="#" class="back-arrow">&lt;</a>
+            <div class="header"><h1>Ticket</h1></div>
+            <div class="ticket-display-card">
+                <img src="https://via.placeholder.com/300x200/00BFA6/FFFFFF?text=Event+Image" alt="Event Visual">
+                <div class="ticket-info-section">
+                    <h2>Event</h2>
+                    <h3>California Art Festival 2023 Dana Point 29-30</h3>
+                    <div class="ticket-flex-row">
+                        <p>Date: March 19, 2023</p>
+                        <p>Time: 10:00 PM - 12:00 PM</p>
+                    </div>
+                    <div class="ticket-flex-row">
+                        <p>Ticket Set: Regular x1</p>
+                        <p>Venue: The Living</p>
+                    </div>
+                </div>
+                <div class="barcode-area">
+                    <img src="https://via.placeholder.com/250x80/FFFFFF/000000?text=BARCODE" alt="Barcode">
+                </div>
+            </div>
+            <div class="ticket-actions">
+                <button class="btn secondary download-btn">Download Image</button>
+                <button class="btn primary share-btn">Share QR</button>
+            </div>
+        </div>
+
+
+        <div class="bottom-nav">
+            <a href="#" class="nav-item active" data-screen="home-screen-content"><i class="icon-home"></i><span>Home</span></a>
+            <a href="#" class="nav-item" data-screen="explore-screen-content"><i class="icon-explore"></i><span>Explore</span></a>
+            <a href="#" class="nav-item" data-screen="plan-event-screen-content"><i class="icon-plan"></i><span>Plan</span></a>
+            <a href="#" class="nav-item" data-screen="tickets-screen-content"><i class="icon-tickets"></i><span>Tickets</span></a>
+            <a href="#" class="nav-item" data-screen="profile-screen-content"><i class="icon-profile"></i><span>Profile</span></a>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const appContainer = document.getElementById('app-container');
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+
+            // Get elements for the plan event flow
+            const planEventScreen = document.getElementById('plan-event-screen-content');
+            const eventDetailsStep = document.getElementById('event-details-step');
+            const mapSelectionStep = document.getElementById('map-selection-step');
+            const paymentPageStep = document.getElementById('payment-page-step');
+
+            const nextToMapBtn = document.getElementById('next-to-map');
+            const submitLocationBtn = document.getElementById('submit-location');
+            const confirmPaymentBtn = document.getElementById('confirm-payment');
+
+            const backToDetailsBtn = document.getElementById('back-to-details');
+            const backToMapBtn = document.getElementById('back-to-map');
+
+            const hereMapContainer = document.getElementById('here-map-container');
+            const selectedLocationText = document.getElementById('selected-location-text');
+
+            let selectedLocationCoords = null;
+            let selectedLocationAddress = '';
+            let platform;
+            let map;
+            let ui;
+            let mapEvents;
+            let marker;
+
+            // Function to show a specific screen
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen-content').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(screenId).classList.add('active');
+
+                // Update active nav item
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.screen === screenId) {
+                        item.classList.add('active');
+                    }
+                });
+
+                // Initialize Here Maps only when the map selection screen is active
+                if (screenId === 'plan-event-screen-content' && mapSelectionStep.style.display === 'flex' && !map) {
+                    initializeHereMap();
+                }
+            }
+
+            // Function to show event details screen and populate it
+            window.showEventDetails = function(eventCardElement) {
+                const title = eventCardElement.dataset.title;
+                const image = eventCardElement.dataset.image;
+                const attendees = eventCardElement.dataset.attendees;
+                const location = eventCardElement.dataset.location;
+                const about = eventCardElement.dataset.about;
+
+                document.getElementById('event-detail-title').textContent = title;
+                document.getElementById('event-details-screen-content').querySelector('.event-details-image').style.backgroundImage = `url('${image}')`;
+                document.getElementById('event-detail-attendees').textContent = attendees;
+                document.getElementById('event-detail-location').textContent = location;
+                document.getElementById('event-detail-about').textContent = about;
+
+                showScreen('event-details-screen-content');
+            };
+
+            // Initial screen setup
+            showScreen('home-screen-content');
+
+            // Handle navigation clicks
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const screenId = item.dataset.screen;
+                    showScreen(screenId);
+                });
+            });
+
+            // Handle "Book Now" button on event details page
+            document.getElementById('book-now-button').addEventListener('click', () => {
+                // Get the current event title from the event details screen
+                const eventTitle = document.getElementById('event-detail-title').textContent;
+                // Update the ticket selection header with the event title
+                document.getElementById('ticket-header-title').textContent = eventTitle;
+                showScreen('select-ticket-screen-content');
+            });
+
+
+            // Initialize Here Maps
+            function initializeHereMap() {
+                // Ensure map is not already initialized or is disposed
+                if (map) {
+                    map.dispose();
+                    map = null;
+                }
+
+                platform = new H.service.Platform({
+                    apikey: 'YOUR_HERE_MAPS_API_KEY' // Replace with your actual Here Maps API key
+                });
+
+                const defaultLayers = platform.createDefaultLayers();
+                map = new H.Map(
+                    hereMapContainer,
+                    defaultLayers.vector.normal.map,
+                    {
+                        zoom: 10,
+                        center: { lat: 19.0760, lng: 72.8777 } // Default to Mumbai coordinates
+                    }
+                );
+
+                mapEvents = new H.mapevents.MapEvents(map);
+                ui = H.ui.UI.createDefault(map, defaultLayers);
+
+                // Add event listener for map clicks
+                map.addEventListener('tap', (evt) => {
+                    selectedLocationCoords = evt.currentPointer.viewportX ? map.screenToGeo(evt.currentPointer.viewportX, evt.currentPointer.viewportY) : evt.target.getGeometry();
+
+                    if (marker) {
+                        map.removeObject(marker);
+                    }
+                    marker = new H.map.Marker(selectedLocationCoords);
+                    map.addObject(marker);
+
+                    // Reverse geocode to get human-readable address
+                    const geocodingService = platform.getSearchService();
+                    geocodingService.reverseGeocode({
+                        at: `${selectedLocationCoords.lat},${selectedLocationCoords.lng}`
+                    }, (result) => {
+                        if (result.items.length > 0) {
+                            selectedLocationAddress = result.items[0].address.label;
+                            selectedLocationText.textContent = `Selected Location: ${selectedLocationAddress}`;
+                        } else {
+                            selectedLocationAddress = `Lat: ${selectedLocationCoords.lat.toFixed(4)}, Lng: ${selectedLocationCoords.lng.toFixed(4)}`;
+                            selectedLocationText.textContent = `Selected Location: ${selectedLocationAddress}`;
+                        }
+                    }, (error) => {
+                        console.error('Error during geocoding:', error);
+                        selectedLocationAddress = `Lat: ${selectedLocationCoords.lat.toFixed(4)}, Lng: ${selectedLocationCoords.lng.toFixed(4)}`;
+                        selectedLocationText.textContent = `Selected Location: ${selectedLocationAddress}`;
+                    });
+                });
+            }
+
+            // Plan Event Flow
+            // Next button from Event Details to Map Selection
+            nextToMapBtn.addEventListener('click', () => {
+                const eventName = document.getElementById('event-name').value;
+                const attendees = document.getElementById('attendees').value;
+                const budget = document.getElementById('budget').value;
+
+                if (eventName && attendees && budget) {
+                    eventDetailsStep.style.display = 'none';
+                    mapSelectionStep.style.display = 'flex';
+                    paymentPageStep.style.display = 'none'; // Ensure payment page is hidden
+                    initializeHereMap(); // Initialize map when navigating to this step
+                } else {
+                    // Simple alert for missing fields (replace with a custom modal in a real app)
+                    alert('Please fill in all event details.');
+                }
+            });
+
+            // Submit Location button from Map Selection to Payment Page
+            submitLocationBtn.addEventListener('click', () => {
+                if (selectedLocationCoords) {
+                    eventDetailsStep.style.display = 'none';
+                    mapSelectionStep.style.display = 'none';
+                    paymentPageStep.style.display = 'flex';
+                } else {
+                    alert('Please select a location on the map.');
+                }
+            });
+
+            // Confirm Payment button (final step)
+            confirmPaymentBtn.addEventListener('click', () => {
+                const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked');
+                if (selectedPaymentMethod) {
+                    alert(`Event planned successfully!\nEvent Name: ${document.getElementById('event-name').value}\nAttendees: ${document.getElementById('attendees').value}\nBudget: ₹${document.getElementById('budget').value}\nLocation: ${selectedLocationAddress}\nPayment Method: ${selectedPaymentMethod.value}`);
+                    // Reset the form and navigate back to home or a confirmation screen
+                    showScreen('home-screen-content');
+                    eventDetailsStep.style.display = 'flex'; // Show first step for next planning
+                    mapSelectionStep.style.display = 'none';
+                    paymentPageStep.style.display = 'none';
+                    document.getElementById('event-name').value = '';
+                    document.getElementById('attendees').value = '';
+                    document.getElementById('budget').value = '';
+                    selectedLocationCoords = null;
+                    selectedLocationAddress = '';
+                    selectedLocationText.textContent = 'Click on the map to select a location';
+                    if (map && marker) {
+                        map.removeObject(marker);
+                        marker = null;
+                    }
+                    if (map) { // Dispose map resources
+                        map.dispose();
+                        map = null;
+                        platform = null;
+                        ui = null;
+                        mapEvents = null;
+                    }
+                } else {
+                    alert('Please select a payment method.');
+                }
+            });
+
+            // Back buttons
+            backToDetailsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                eventDetailsStep.style.display = 'flex';
+                mapSelectionStep.style.display = 'none';
+                paymentPageStep.style.display = 'none';
+                if (map && marker) {
+                    map.removeObject(marker);
+                    marker = null;
+                }
+                if (map) { // Dispose map resources
+                    map.dispose();
+                    map = null;
+                    platform = null;
+                    ui = null;
+                    mapEvents = null;
+                }
+            });
+
+            backToMapBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                eventDetailsStep.style.display = 'none';
+                mapSelectionStep.style.display = 'flex';
+                paymentPageStep.style.display = 'none';
+                initializeHereMap(); // Re-initialize map if going back to it
+            });
+
+            // Handling back arrow on plan event screen itself to go back to home
+            planEventScreen.querySelector('.back-arrow').addEventListener('click', (e) => {
+                e.preventDefault();
+                // If on map or payment step, go back to previous step
+                if (mapSelectionStep.style.display === 'flex') {
+                    eventDetailsStep.style.display = 'flex';
+                    mapSelectionStep.style.display = 'none';
+                    if (map && marker) {
+                        map.removeObject(marker);
+                        marker = null;
+                    }
+                    if (map) { // Dispose map resources
+                        map.dispose();
+                        map = null;
+                        platform = null;
+                        ui = null;
+                        mapEvents = null;
+                    }
+                } else if (paymentPageStep.style.display === 'flex') {
+                    mapSelectionStep.style.display = 'flex';
+                    paymentPageStep.style.display = 'none';
+                    initializeHereMap(); // Re-initialize map if going back to it
+                } else {
+                    // If on the first step, go back to home screen
+                    showScreen('home-screen-content');
+                    // Reset form fields when leaving plan event screen from the first step
+                    document.getElementById('event-name').value = '';
+                    document.getElementById('attendees').value = '';
+                    document.getElementById('budget').value = '';
+                    selectedLocationCoords = null;
+                    selectedLocationAddress = '';
+                    selectedLocationText.textContent = 'Click on the map to select a location';
+                }
+            });
+
+            // Other screen back arrows
+            document.querySelectorAll('.screen-content .back-arrow').forEach(arrow => {
+                // Ensure this only applies to back arrows on screens *other than* plan-event, or specifically to the top-level plan-event back arrow
+                if (arrow.parentElement.id !== 'plan-event-screen-content' || (arrow.parentElement.id === 'plan-event-screen-content' && arrow.id === '')) { // The main back arrow for plan-event has no ID
+                    arrow.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showScreen('home-screen-content'); // Always go back to home for other screens
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

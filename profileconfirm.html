@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Profile</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app-container" class="screen active"> <div id="create-profile-screen" class="screen-content active">
+            <a href="#" class="back-arrow" id="back-to-previous">&lt;</a> <div class="container profile-creation-container">
+                <h1>Create Profile</h1>
+                <div class="profile-image-upload">
+                    <input type="file" id="profile-image-input" accept="image/*">
+                    <label for="profile-image-input" class="profile-image-placeholder">
+                        <img id="profile-preview" src="https://via.placeholder.com/120/333333/666666?text=+" alt="Profile Image">
+                        <span class="upload-icon">+</span>
+                    </label>
+                </div>
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob">
+                </div>
+                <button id="complete-profile-button" class="btn primary">Complete Profile</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>

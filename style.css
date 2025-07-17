@@ -1,0 +1,342 @@
+/* General Body and HTML structure */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1A1A1A; /* Dark background for the overall page */
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color-primary);
+    overflow: hidden; /* Prevent body scroll */
+}
+
+/* Variables for consistent theming */
+:root {
+    --primary-color: #00BFA6; /* Teal */
+    --secondary-color: #FF6F00; /* Orange (used in gradients) */
+    --dark-bg: #1A1A1A; /* Main dark background */
+    --light-bg: #FFFFFF; /* Light background for text/icons */
+    --card-bg: #2C2C2C; /* Darker grey for cards/containers */
+    --input-bg: #333333; /* Input field background */
+    --text-color-primary: #FFFFFF;
+    --text-color-secondary: #AAAAAA;
+    --border-color: #444444;
+    --error-color: #FF3D00; /* Red */
+    --gradient-start: #FF6F00; /* Orange */
+    --gradient-end: #FFB300; /* Amber */
+    --light-grey-text: #E0E0E0;
+}
+
+/* Main phone frame container */
+.screen {
+    width: 375px; /* Standard mobile width */
+    height: 812px; /* Standard mobile height (iPhone X/XS/11 Pro/12/13/14) */
+    background-color: var(--dark-bg);
+    border-radius: 40px;
+    box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden; /* Crucial to contain internal screens */
+    position: relative; /* For absolute positioning of inner screens */
+    display: flex;
+    flex-direction: column;
+    /* Initial state: hidden, will be activated by JS or directly in HTML */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, visibility 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* State when the main screen is active/visible */
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Styles for internal content screens within the main .screen container */
+.screen-content {
+    width: 100%;
+    height: 100%; /* Take full height of parent .screen */
+    display: none; /* Hidden by default */
+    flex-direction: column; /* Content inside stacks vertically */
+    overflow-y: hidden; /* Prevent inner scrollbars unless specifically set on child elements like .container */
+    position: absolute; /* Position absolutely within the .screen */
+    top: 0;
+    left: 0;
+    transition: opacity 0.5s ease-in-out; /* Smooth transition for content changes */
+    opacity: 0;
+    box-sizing: border-box; /* Ensure padding/border included in size */
+}
+
+/* State when an internal content screen is active/visible */
+.screen-content.active {
+    display: flex; /* Show when active */
+    opacity: 1;
+    overflow-y: auto; /* Allow scrolling for content that overflows */
+}
+
+/* Splash Screen Specific Styles */
+#splash-screen {
+    background-color: var(--primary-color); /* Teal background */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+}
+
+#splash-screen .app-logo-dashes {
+    display: flex;
+    gap: 15px; /* Space between dashes */
+}
+
+#splash-screen .dash-item {
+    width: 30px; /* Width of each dash */
+    height: 60px; /* Height of each dash */
+    background-color: var(--light-bg); /* White dashes */
+    border-radius: 5px;
+    transform: skewX(-15deg); /* Slanted effect */
+    animation: bounce 0.8s ease-in-out infinite alternate;
+}
+
+#splash-screen .dash-item:last-child {
+    animation-delay: 0.2s; /* Staggered animation */
+}
+
+@keyframes bounce {
+    from { transform: translateY(0) skewX(-15deg); }
+    to { transform: translateY(-10px) skewX(-15deg); }
+}
+
+#splash-screen .loading-percentage {
+    font-size: 1.2em;
+    color: var(--light-bg);
+    margin-top: 50px; /* Space from logo */
+    animation: fadePulse 1.5s infinite alternate;
+}
+
+@keyframes fadePulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* Onboarding Screen Specific Styles */
+#onboarding-screen {
+    padding: 30px;
+    justify-content: space-around; /* Distribute space */
+    align-items: center;
+    text-align: center;
+    background-color: var(--dark-bg);
+}
+
+#onboarding-screen .onboarding-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#onboarding-screen h1 {
+    font-size: 2.2em;
+    margin-bottom: 15px;
+    color: var(--text-color-primary);
+    line-height: 1.3;
+}
+
+#onboarding-screen p {
+    font-size: 1em;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    margin-bottom: 50px;
+}
+
+/* Login and Signup Screen Common Styles */
+#login-screen, #signup-screen, #create-profile-screen {
+    padding: 20px;
+    padding-top: 60px; /* Space for back arrow */
+    justify-content: flex-start;
+    align-items: center;
+    background-color: var(--dark-bg);
+}
+
+.container {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+}
+
+.container h1 {
+    font-size: 1.8em;
+    margin-bottom: 30px;
+    color: var(--text-color-primary);
+}
+
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9em;
+    color: var(--text-color-secondary);
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--input-bg);
+    color: var(--text-color-primary);
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.input-group input::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.7;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 191, 166, 0.3); /* Soft glow */
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    font-size: 0.85em;
+    color: var(--text-color-secondary);
+    text-decoration: none;
+    margin-top: -10px;
+    margin-bottom: 25px;
+}
+
+.forgot-password:hover {
+    color: var(--primary-color);
+}
+
+.signup-link, .login-link {
+    font-size: 0.9em;
+    color: var(--text-color-secondary);
+    margin-top: 25px;
+}
+
+.signup-link a, .login-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signup-link a:hover, .login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+.btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn.primary {
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+    color: var(--light-bg);
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 111, 0, 0.3);
+}
+
+.btn.secondary {
+    background-color: var(--input-bg);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn.secondary:hover {
+    background-color: var(--border-color);
+    transform: translateY(-2px);
+}
+
+/* Back Arrow (Common for multiple screens) */
+.back-arrow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 1.8em;
+    color: var(--text-color-primary);
+    text-decoration: none;
+    z-index: 10;
+}
+
+/* Profile Creation Specific Styles (profileconfirm.html) */
+#create-profile-screen .profile-creation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.profile-image-upload {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--input-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+}
+
+.profile-image-upload input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.profile-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: var(--text-color-secondary);
+    font-size: 0.9em;
+}
+
+.profile-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-image-placeholder .upload-icon {
+    position: absolute;
+    font-size: 3em;
+    color: var(--primary-color);
+}
